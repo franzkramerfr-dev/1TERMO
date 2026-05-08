@@ -238,8 +238,8 @@ while True:
 
            vagas_disponiveis = vagas_disponiveis +1
 
-       elif forma_pagamento == 2:
-         saldo = float(input("Digite o saldo em sua conta:\n"))
+         elif forma_pagamento == 2:
+          saldo = float(input("Digite o saldo em sua conta:\n"))
        
          if saldo < valor_total:
           print("Saldo Insuficiente.")
@@ -251,7 +251,7 @@ while True:
           print("Passagem Liberada.")
           print("Agrademos pela preferência. Volte sempre!")
           print("Avaliação\n1⭐\n2⭐⭐\n3⭐⭐⭐\n4⭐⭐⭐⭐\n5⭐⭐⭐⭐⭐")
-          int(input("Deixe seu Avaliação!\n"))
+          avaliacao = int(str(input("Deixe seu Avaliação!\n")))
           print("Agradecemos seu Feedback!")
           vagas_disponiveis = vagas_disponiveis +1
           
