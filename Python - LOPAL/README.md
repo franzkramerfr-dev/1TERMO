@@ -37,4 +37,3 @@ cd seu-repositorio
 
 3. Execute um exemplo:
 python aula_01/exercicio_exemplo.py
-Atenciosamente, [Franz].
