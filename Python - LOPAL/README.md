@@ -20,22 +20,21 @@ O aprendizado está dividido em módulos lógicos para facilitar a navegação:
   * Armazenamento e manipulação de informações através de **Listas**.
 
 ## 🛠️ Tecnologias e Ferramentas
-* **Linguagem:** Python 3.x
+* **Linguagem:** Python 3.14
 * **Ambiente:** VS Code / Terminal
 * **Versionamento:** Git & GitHub
 
 ## 🚀 Como Explorar este Repositório
 Se você deseja testar os códigos localmente, siga os passos abaixo:
 
-## 1. Clone o projeto:
+## Códigos Git
 ```bash
+1. Clone o repositório:
 git clone (https://github.com/seu-usuario/seu-repositorio.git)
 
-## 2. Entre no diretório:
-```bash
+2. Entre no diretório:
 cd seu-repositorio
 
-## 3. Execute um exemplo:
-```bash
+3. Execute um exemplo:
 python aula_01/exercicio_exemplo.py
 Atenciosamente, [Franz].
