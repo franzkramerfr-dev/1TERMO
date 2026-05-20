@@ -25,16 +25,18 @@ def subir(andar_atual, numero_andar):
     print("Elevador Subindo...")
 
     for contagem_andar in range(andar_atual + 1, numero_andar + 1):
+
         print(f"Andar {contagem_andar}")
-        time.sleep(1)
+        time.sleep(2)
 
 
 def descer(andar_atual, numero_andar):
     print("Elevador Descendo...")
 
     for contagem_andar in range(andar_atual - 1, numero_andar - 1, -1):
+        
         print(f"Andar {contagem_andar}")
-        time.sleep(1)
+        time.sleep(2)
 
 
 def encerrar():
@@ -58,20 +60,20 @@ while True:
         print("Número de pessoas acima do limite!")
 
     else:
-        entrada = input(
+        andar_usuario = input(
             "Qual andar deseja ir?\n"
             "1 | 2 | 3\n"
             "4 | 5 | 6\n"
             "7 | 8 | 9\n"
-            "10\n"
+            "0 |10 |\n"
             "Digite 'sair' para encerrar:\n"
         ).lower()
 
-        if entrada == "sair":
+        if andar_usuario == "sair":
             encerrar()
             break
 
-        numero_andar = int(entrada)
+        numero_andar = int(andar_usuario)
 
         if numero_andar > andar_atual:
             subir(andar_atual, numero_andar)
