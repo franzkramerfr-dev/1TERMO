@@ -86,5 +86,5 @@ while True:
 
         andar_atual = numero_andar
 
-        print(f"Você chegou ao seu andar.")
+        print("Você chegou ao seu andar.")
         print(f"Andar Atual: {andar_atual}")
