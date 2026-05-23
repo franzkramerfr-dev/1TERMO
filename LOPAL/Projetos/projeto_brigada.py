@@ -20,7 +20,7 @@
 
 def cadastrar_funcionario():
     nome_cadastro = input("Digite o nome do funcionário: ")
-    setor_cadastro = input("Digite o setor do funcionário: ")
+    setor_cadastro = input("Digite o setor do funcionário e sua NR: ")
     treinamento_cadastro = input("O funcionário está com os treinamentos em dia? (sim/não): ").lower()
 
     return nome_cadastro, setor_cadastro, treinamento_cadastro
@@ -33,11 +33,27 @@ def verificacao_epi():
 
 def verificar_treinamento_brigada():
     nome_funcionario = input("Digite o nome do Funcionário: ")
-    ano_treinamento_funcionario = int(input("Informe o ultimo ano de Treinamento da Brigada de Incêncio: "))
+    ano_treinamento_funcionario = int(input("Informe o seu ultimo ano de Treinamento da Brigada de Incêncio: "))
+    ano_atual = int(input("Informe o ano atual: "))
     
+    return nome_funcionario, ano_treinamento_funcionario, ano_atual
 
-    
-    return nome_funcionario, ano_treinamento_funcionario
+def resumo_dos_funcionarios(nomes, setores, treinamentos):
+    total_funcionarios = len(nomes)
+    treinamentos_em_dia = 0
+
+    for status in treinamentos:
+        if status == "sim":
+            treinamentos_em_dia += 1
+
+    print("\nRelatório Geral")
+    print(f"Total de funcionários cadastrados: {total_funcionarios}")
+    print(f"Funcionários com treinamentos em dia: {treinamentos_em_dia}")
+
+nomes = []
+setores = []
+treinamentos = []
+
 
     
 
@@ -59,7 +75,11 @@ while True:
     if opcao_menu == 1:
             print("Cadastro de Funcionário")
             nome_cadastro, setor_cadastro, treinamento_cadastro = cadastrar_funcionario()
-        
+
+            nomes += [nome_cadastro]
+            setores += [setor_cadastro]
+            treinamentos += [treinamento_cadastro]
+
             if treinamento_cadastro == "sim":
               print(f"Funcionário {nome_cadastro} cadastrado com sucesso no setor {setor_cadastro} com status de treinamento em dia.")
 
@@ -82,37 +102,36 @@ while True:
             print(f"\nNome do funcionário: {nome_funcionario}\nLista de EPIs obrigatórios para áreas de Trabalho(NR-35) em Altura\n\n-Cinturão de Segurança\n-Talabarte")
         
         elif setor_cadastrado ==3:
-            print(f"Prezado Funcionário;\nEquipamentos de Proteção para área de Brigada serão debatidos em reunião\nAgradecemos a compreensão.\n")
+            print("Prezado Funcionário;\nEquipamentos de Proteção para área de Brigada serão debatidos em reunião\nAgradecemos a compreensão.\n")
 
         else: 
             print("Selecione um NR correspondente ao seu setor.")
 
     elif opcao_menu == 3:
-        nome_funcionario, ano_treinamento = verificar_treinamento_brigada()
-        ano_atual = 2026
-        if ano_treinamento < 2024:
-            print("Treinamento Vencido! Encaminhar para reciclagem.")
+        print("\nVerificação de Treinamentos da Brigada de Incêncio")
+        nome_funcionario, ano_treinamento, ano_atual = verificar_treinamento_brigada()
+        calculo_treinamento = ano_atual - ano_treinamento
+        if calculo_treinamento >2:
+            print(f"Olá {nome_funcionario}!\nTreinamento Vencido! Encaminhar para reciclagem.")
         
         else:
-            print("Treinamento Válido.")
+            print(f"Olá {nome_funcionario}!\nTreinamento Válido.")
 
+    elif opcao_menu == 4:
+        print("\nRelatório Geral")
         
         
+              
+        resumo_dos_funcionarios(nomes, setores, treinamentos)
 
-
-
-
-
-
-
-
-    
-     # Código para listar EPIs por setor
         
-    # elif opcao == "3":
-    #     # Código para verificar treinamento da Brigada de Incêndio
+    elif opcao_menu == 5:
+        print("Encerrando Sistema...")
+
+        break
+
+
+
+
+
         
-    # elif opcao == "4":
-    #     # Código para exibir resumo dos funcionários
-        
-    # elif opcao == "5":
