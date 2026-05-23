@@ -16,7 +16,7 @@
 # O sistema deve criar uma função que receba o ano do último treinamento da Brigada de Incêndio.
 # Exiba na tela um resumo com o total de funcionários cadastrados e quantos estão com treinamentos em dia.
 
-
+import time
 
 def cadastrar_funcionario():
     nome_cadastro = input("Digite o nome do funcionário: ")
@@ -127,7 +127,11 @@ while True:
         
     elif opcao_menu == 5:
         print("Encerrando Sistema...")
+        for contagem_encerramento in range(3, 0, -1):
+            print(f"{contagem_encerramento}")
+            time.sleep(2)
 
+        print("Sistema Encerrado.")
         break
 
 
