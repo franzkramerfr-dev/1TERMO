@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MetalPrime - Controle de Produção</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #020617; color: #fff; min-height: 100vh; }
+
+    /* ── Utilitários ── */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    @media (max-width: 768px) {
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* ── LOGIN ── */
+    #screen-login {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #020617, #0f172a, #020617);
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .login-wrapper { width: 100%; max-width: 900px; }
+    .login-title { text-align: center; margin-bottom: 3rem; }
+    .login-title h1 { font-size: 3rem; font-weight: 700; }
+    .login-title p { color: #94a3b8; font-size: 1.1rem; margin-top: .5rem; }
+    .login-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    @media(max-width:700px){ .login-cards { grid-template-columns: 1fr; } }
+    .login-card {
+      background: #1e293b; border: 1px solid #334155; border-radius: 1rem;
+      padding: 2rem; cursor: pointer; transition: transform .2s, background .2s;
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+    .login-card:hover { background: #334155; transform: scale(1.04); }
+    .login-card .icon-circle {
+      width: 5rem; height: 5rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    }
+    .login-card h2 { font-size: 1.4rem; font-weight: 700; }
+    .login-card p { font-size: .85rem; color: #94a3b8; text-align: center; }
+    .blue-bg  { background: rgba(59,130,246,.2); }
+    .green-bg { background: rgba(34,197,94,.2); }
+    .orange-bg{ background: rgba(249,115,22,.2); }
+
+    /* ── HEADER ── */
+    header {
+      background: #0f172a; border-bottom: 1px solid #1e293b;
+      padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p  { font-size: .8rem; color: #94a3b8; margin-top: .2rem; }
+    .btn-logout {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .5rem 1rem; background: #1e293b; border: none;
+      color: #cbd5e1; border-radius: .5rem; cursor: pointer; font-size: .9rem;
+    }
+    .btn-logout:hover { background: #334155; }
+
+    /* ── CONTEÚDO ── */
+    .content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── CARDS KPI ── */
+    .kpi-card {
+      background: #0f172a; border: 1px solid #1e293b;
+      border-radius: .75rem; padding: 1.5rem;
+    }
+    .kpi-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .kpi-icon {
+      width: 3rem; height: 3rem; border-radius: .5rem;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .kpi-label { font-size: .8rem; color: #94a3b8; }
+    .kpi-value { font-size: 1.5rem; font-weight: 700; }
+    .progress-bar-track {
+      width: 100%; height: .75rem; background: #1e293b;
+      border-radius: 9999px; overflow: hidden; margin-top: .5rem;
+    }
+    .progress-bar-fill { height: 100%; border-radius: 9999px; transition: width .4s; }
+    .progress-label { text-align: right; font-size: .8rem; color: #cbd5e1; margin-top: .3rem; }
+
+    /* ── BUSCA ── */
+    .search-box {
+      background: #0f172a; border: 1px solid #1e293b;
+      border-radius: .75rem; padding: 1.5rem;
+    }
+    .search-input-wrap { position: relative; }
+    .search-input-wrap span { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: #64748b; }
+    .search-input {
+      width: 100%; padding: .75rem 1rem .75rem 2.8rem;
+      background: #1e293b; border: 1px solid #334155; color: #fff;
+      border-radius: .5rem; font-size: 1rem; outline: none;
+    }
+    .search-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.3); }
+    .search-input::placeholder { color: #64748b; }
+
+    /* ── TABELA ── */
+    .table-card { background: #0f172a; border: 1px solid #1e293b; border-radius: .75rem; overflow: hidden; }
+    .table-title { padding: 1rem 1.5rem; border-bottom: 1px solid #1e293b; font-size: 1rem; font-weight: 700; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #1e293b; }
+    th { padding: .75rem 1.5rem; text-align: left; font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: 1rem 1.5rem; font-size: .875rem; color: #cbd5e1; border-bottom: 1px solid #1e293b; }
+    tr:hover td { background: #1e293b; }
+    tr.priority-row td { background: rgba(234,179,8,.08); }
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: .25rem .75rem; border-radius: 9999px; font-size: .7rem; font-weight: 600;
+    }
+    .badge-green  { background: rgba(34,197,94,.15);  color: #4ade80; }
+    .badge-orange { background: rgba(249,115,22,.15); color: #fb923c; }
+    .badge-red    { background: rgba(239,68,68,.15);  color: #f87171; }
+    .btn-priority {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .4rem .75rem; border-radius: .5rem; border: none;
+      font-size: .8rem; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .btn-priority.off { background: #1e293b; color: #cbd5e1; }
+    .btn-priority.off:hover { background: #334155; }
+    .btn-priority.on  { background: #eab308; color: #fff; }
+    .td-progress { display: flex; align-items: center; gap: .75rem; }
+    .td-progress-track { flex: 1; height: .5rem; background: #1e293b; border-radius: 9999px; overflow: hidden; }
+    .td-progress-fill  { height: 100%; border-radius: 9999px; }
+
+    /* ── KANBAN SUPERVISORA ── */
+    .kanban-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    @media(max-width:900px){ .kanban-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:600px){ .kanban-grid { grid-template-columns: 1fr; } }
+    .machine-card {
+      border-radius: 1rem; padding: 1.5rem; border: 2px solid; transition: border-color .2s;
+    }
+    .machine-card.status-operando { background: rgba(34,197,94,.06); border-color: rgba(34,197,94,.35); }
+    .machine-card.status-pausada  { background: rgba(249,115,22,.06); border-color: rgba(249,115,22,.35); }
+    .machine-card.status-disponivel { background: #0f172a; border-color: #334155; }
+    .machine-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .machine-name { font-size: 1.4rem; font-weight: 700; }
+    .machine-type { font-size: .9rem; color: #94a3b8; margin-top: .2rem; }
+    .machine-status-dot {
+      width: 4rem; height: 4rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
+    .dot-green  { background: #22c55e; }
+    .dot-orange { background: #f97316; }
+    .dot-gray   { background: #334155; }
+    .machine-os-box {
+      background: #1e293b; border-radius: .75rem; padding: 1rem; margin-bottom: 1rem;
+    }
+    .machine-os-box .os-row { font-size: .8rem; color: #94a3b8; margin-bottom: .25rem; }
+    .machine-os-box .os-id  { font-family: monospace; font-weight: 700; color: #fff; }
+    .machine-os-box .os-peca{ font-size: .85rem; color: #cbd5e1; margin-top: .25rem; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; }
+    .btn-machine {
+      padding: 1rem .5rem; border-radius: .75rem; border: none;
+      cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; gap: .3rem; font-size: .7rem; font-weight: 600;
+      transition: opacity .2s; color: #fff;
+    }
+    .btn-machine span.icon { font-size: 1.4rem; }
+    .btn-machine.green  { background: #22c55e; }
+    .btn-machine.green:hover  { background: #16a34a; }
+    .btn-machine.orange { background: #f97316; }
+    .btn-machine.orange:hover { background: #ea580c; }
+    .btn-machine.blue   { background: #3b82f6; }
+    .btn-machine.blue:hover   { background: #2563eb; }
+    .btn-machine:disabled { background: #1e293b !important; color: #475569; cursor: not-allowed; }
+    .btn-nova-os {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .75rem 1.5rem; background: #16a34a; color: #fff;
+      border: none; border-radius: .75rem; font-size: 1rem;
+      font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .btn-nova-os:hover { background: #15803d; }
+
+    /* ── ALMOXARIFE ── */
+    .material-list { background: #0f172a; border: 1px solid #1e293b; border-radius: .75rem; overflow: hidden; }
+    .material-list-header { padding: 1rem 1.5rem; border-bottom: 1px solid #1e293b; background: #1e293b; font-weight: 700; }
+    .material-item { padding: 1.5rem; display: flex; gap: 1.5rem; border-bottom: 1px solid #1e293b; transition: background .15s; }
+    .material-item:hover { background: #1e293b; }
+    .material-item:last-child { border-bottom: none; }
+    .mat-icon-wrap { flex-shrink: 0; }
+    .mat-icon-circle {
+      width: 4rem; height: 4rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
+    .mat-body { flex: 1; min-width: 0; }
+    .mat-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .5rem; }
+    .mat-code { font-family: monospace; font-size: 1.1rem; font-weight: 700; }
+    .mat-nome { font-size: .9rem; color: #cbd5e1; margin-top: .15rem; }
+    .mat-loc  { font-size: .8rem; color: #64748b; margin-bottom: 1rem; }
+    .mat-qtd-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1rem; }
+    @media(max-width:700px){ .mat-qtd-grid { grid-template-columns: 1fr 1fr; } }
+    .mat-qtd-box { border-radius: .5rem; padding: .75rem; }
+    .mat-qtd-label { font-size: .7rem; margin-bottom: .25rem; }
+    .mat-qtd-value { font-size: 1.1rem; font-weight: 700; }
+    .box-default { background: #1e293b; }
+    .box-orange  { background: rgba(249,115,22,.1); }
+    .mat-reserva-alert {
+      background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3);
+      border-radius: .5rem; padding: .75rem; font-size: .8rem; color: #60a5fa; margin-top: .75rem;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.75);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 1rem;
+    }
+    .modal-box {
+      background: #0f172a; border: 1px solid #334155;
+      border-radius: 1rem; padding: 2rem; width: 100%; max-width: 28rem;
+    }
+    .modal-box.large { max-width: 42rem; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: .5rem; }
+    .modal-sub   { color: #94a3b8; text-align: center; font-size: .9rem; margin-bottom: 1.5rem; }
+    .pin-input {
+      width: 100%; text-align: center; font-size: 2rem; font-weight: 700;
+      letter-spacing: .5rem; padding: 1rem; background: #1e293b;
+      border: 2px solid #334155; color: #fff; border-radius: .75rem;
+      outline: none; margin-bottom: 1.5rem;
+    }
+    .pin-input:focus { border-color: #3b82f6; }
+    .modal-form label { display: block; font-size: .9rem; color: #cbd5e1; margin-bottom: .5rem; font-weight: 500; }
+    .modal-form select,
+    .modal-form input[type=number],
+    .modal-form input[type=date] {
+      width: 100%; padding: 1rem 1.25rem; font-size: 1rem;
+      background: #1e293b; border: 2px solid #334155; color: #fff;
+      border-radius: .75rem; outline: none; margin-bottom: 1.25rem;
+    }
+    .modal-form select:focus,
+    .modal-form input:focus { border-color: #3b82f6; }
+    .modal-form select option { background: #1e293b; }
+    .os-alert {
+      background: rgba(59,130,246,.1); border: 2px solid rgba(59,130,246,.3);
+      border-radius: .75rem; padding: 1rem; margin-bottom: 1.5rem;
+      font-size: .85rem; color: #60a5fa;
+    }
+    .os-alert strong { display: block; margin-bottom: .25rem; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .btn-cancel {
+      padding: 1rem; background: #1e293b; color: #cbd5e1;
+      border: none; border-radius: .75rem; font-size: 1rem; cursor: pointer;
+    }
+    .btn-cancel:hover { background: #334155; }
+    .btn-confirm {
+      padding: 1rem; background: #3b82f6; color: #fff;
+      border: none; border-radius: .75rem; font-size: 1rem; cursor: pointer; font-weight: 600;
+    }
+    .btn-confirm:hover { background: #2563eb; }
+    .btn-create {
+      padding: 1rem; background: #16a34a; color: #fff;
+      border: none; border-radius: .75rem; font-size: 1rem; cursor: pointer; font-weight: 600;
+    }
+    .btn-create:hover { background: #15803d; }
+    .alert-danger { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #f87171; border-radius: .5rem; padding: .75rem; font-size: .85rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     TELA DE LOGIN
+════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-wrapper">
+    <div class="login-title">
+      <h1>MetalPrime</h1>
+      <p>Sistema de Controle de Produção</p>
+    </div>
+    <div class="login-cards">
+      <button class="login-card" onclick="login('diretor')">
+        <div class="icon-circle blue-bg">🏢</div>
+        <h2>Diretor</h2>
+        <p>Visão estratégica e indicadores de performance</p>
+      </button>
+      <button class="login-card" onclick="login('supervisora')">
+        <div class="icon-circle green-bg">👷</div>
+        <h2>Supervisora</h2>
+        <p>Controle operacional e gestão de máquinas</p>
+      </button>
+      <button class="login-card" onclick="login('almoxarife')">
+        <div class="icon-circle orange-bg">📦</div>
+        <h2>Almoxarife</h2>
+        <p>Gestão de estoque e matéria-prima</p>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     DASHBOARD DIRETOR
+════════════════════════════════════════════ -->
+<div id="screen-diretor" class="hidden">
+  <header>
+    <div>
+      <h1>Dashboard Diretor</h1>
+      <p>MetalPrime - Visão Gerencial</p>
+    </div>
+    <button class="btn-logout" onclick="logout()">⬅ Sair</button>
+  </header>
+  <div class="content">
+
+    <!-- KPIs -->
+    <div class="grid-3">
+      <!-- Produção -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon blue-bg">📈</div>
+          <div>
+            <div class="kpi-label">Produção Diária</div>
+            <div class="kpi-value">387 / 500</div>
+          </div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" style="width:77%;background:#3b82f6"></div>
+        </div>
+        <div class="progress-label">77%</div>
+      </div>
+      <!-- Prazos -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon green-bg">✅</div>
+          <div>
+            <div class="kpi-label">Cumprimento de Prazos</div>
+            <div class="kpi-value" id="kpi-prazo-val">— / —</div>
+          </div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="kpi-prazo-bar" style="background:#22c55e"></div>
+        </div>
+        <div class="progress-label" id="kpi-prazo-pct"></div>
+      </div>
+      <!-- Críticos -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon" id="kpi-crit-icon" style="background:rgba(239,68,68,.15)">⚠️</div>
+          <div>
+            <div class="kpi-label">Pedidos Críticos</div>
+            <div class="kpi-value" id="kpi-crit-val">—</div>
+          </div>
+        </div>
+        <div id="kpi-crit-msg"></div>
+      </div>
+    </div>
+
+    <!-- Busca -->
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <span>🔍</span>
+        <input class="search-input" type="text" placeholder="Buscar pedido por código, cliente ou peça..." oninput="filterOrders(this.value)" />
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-card">
+      <div class="table-title">Pedidos Ativos</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th><th>Cliente</th><th>Peça</th>
+              <th>Qtd</th><th>Entrega</th><th>Status</th><th>Progresso</th><th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     DASHBOARD SUPERVISORA
+════════════════════════════════════════════ -->
+<div id="screen-supervisora" class="hidden">
+  <header>
+    <div>
+      <h1>Controle de Produção</h1>
+      <p>Supervisão de Máquinas</p>
+    </div>
+    <div style="display:flex;gap:.75rem">
+      <button class="btn-nova-os" onclick="openOSModal()">＋ Nova O.S.</button>
+      <button class="btn-logout" onclick="logout()">⬅</button>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kanban-grid" id="kanban-grid"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     DASHBOARD ALMOXARIFE
+════════════════════════════════════════════ -->
+<div id="screen-almoxarife" class="hidden">
+  <header>
+    <div>
+      <h1>Gestão de Almoxarifado</h1>
+      <p>MetalPrime - Controle de Estoque</p>
+    </div>
+    <button class="btn-logout" onclick="logout()">⬅ Sair</button>
+  </header>
+  <div class="content">
+    <!-- KPIs -->
+    <div class="grid-3">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon blue-bg">📦</div>
+          <div><div class="kpi-label">Total de Itens</div><div class="kpi-value" id="alm-total">—</div></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon orange-bg">⚠️</div>
+          <div><div class="kpi-label">Em Atenção</div><div class="kpi-value" id="alm-atencao">—</div></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background:rgba(239,68,68,.15)">🔴</div>
+          <div><div class="kpi-label">Críticos</div><div class="kpi-value" id="alm-criticos">—</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Busca -->
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <span>🔍</span>
+        <input class="search-input" type="text" placeholder="Buscar por código, nome ou localização..." oninput="filterMaterials(this.value)" />
+      </div>
+    </div>
+    <!-- Lista -->
+    <div class="material-list">
+      <div class="material-list-header">Inventário de Matéria-Prima</div>
+      <div id="material-list-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     MODAL PIN
+════════════════════════════════════════════ -->
+<div id="modal-pin" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">Validação de Supervisão</div>
+    <div class="modal-sub">Digite o PIN para confirmar a ação</div>
+    <div id="pin-error" class="alert-danger hidden">PIN incorreto. Tente novamente.</div>
+    <input class="pin-input" id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" />
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closePinModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="submitPin()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     MODAL NOVA O.S.
+════════════════════════════════════════════ -->
+<div id="modal-os" class="modal-overlay hidden">
+  <div class="modal-box large">
+    <div class="modal-title" style="text-align:left;margin-bottom:1.5rem">Nova Ordem de Serviço</div>
+    <div class="modal-form">
+      <label>Cliente</label>
+      <select id="os-cliente">
+        <option value="">Selecione o cliente</option>
+        <option>Indústria ABC</option>
+        <option>Metalúrgica XYZ</option>
+        <option>Construtora Silva</option>
+        <option>Fabricante Omega</option>
+      </select>
+      <label>Peça (Pré-cadastrada)</label>
+      <select id="os-peca">
+        <option value="">Selecione a peça</option>
+        <option value="M-450">M-450 - Suporte Metálico M-450</option>
+        <option value="F-120">F-120 - Flange Industrial F-120</option>
+        <option value="VR-300">VR-300 - Viga Reforçada VR-300</option>
+        <option value="CH-80">CH-80 - Chapa Perfurada CH-80</option>
+      </select>
+      <label>Quantidade</label>
+      <input type="number" id="os-quantidade" placeholder="0" min="1" />
+      <label>Data de Entrega</label>
+      <input type="date" id="os-data" />
+    </div>
+    <div class="os-alert">
+      <strong>ℹ️ Validação Automática</strong>
+      O sistema verificará automaticamente se há matéria-prima suficiente no estoque antes de liberar a O.S.
+    </div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeOSModal()">Cancelar</button>
+      <button class="btn-create" onclick="createOS()">Criar O.S.</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+// ── Estado Global ──────────────────────────────────────────────
+let currentRole = null;
+let pendingMachineId = null;
+let pendingAction = null;
+
+const orders = [
+  { id:'OS-2024-001', cliente:'Indústria ABC',    peca:'Suporte Metálico M-450', quantidade:200, dataEntrega:'2026-05-30', status:'no-prazo', progresso:75,  prioridade:false },
+  { id:'OS-2024-002', cliente:'Metalúrgica XYZ',  peca:'Flange Industrial F-120', quantidade:150, dataEntrega:'2026-05-29', status:'atencao',  progresso:45,  prioridade:false },
+  { id:'OS-2024-003', cliente:'Construtora Silva', peca:'Viga Reforçada VR-300',  quantidade:80,  dataEntrega:'2026-05-28', status:'atrasado', progresso:30,  prioridade:false },
+];
+
+const machines = [
+  { id:'M-01', nome:'Torno CNC',   status:'operando',   osAtual:'OS-2024-001', pecaAtual:'Suporte Metálico M-450', progresso:75 },
+  { id:'M-02', nome:'Fresadora',   status:'pausada',    osAtual:'OS-2024-002', pecaAtual:'Flange Industrial F-120', progresso:45 },
+  { id:'M-03', nome:'Serra Fita',  status:'disponivel', osAtual:null, pecaAtual:null, progresso:0 },
+  { id:'M-04', nome:'Dobradeira',  status:'disponivel', osAtual:null, pecaAtual:null, progresso:0 },
+  { id:'M-05', nome:'Furadeira',   status:'operando',   osAtual:'OS-2024-003', pecaAtual:'Viga Reforçada VR-300', progresso:30 },
+  { id:'M-06', nome:'Solda MIG',   status:'disponivel', osAtual:null, pecaAtual:null, progresso:0 },
+];
+
+const materials = [
+  { id:'1', codigo:'ACO-1020',   nome:'Aço Carbono 1020 - Barra Ø 25mm',    quantidade:850, unidade:'kg', localizacao:'Prateleira A3 - Setor 1', limiteSeguranca:200, reservado:150 },
+  { id:'2', codigo:'ACO-1045',   nome:'Aço Carbono 1045 - Barra Ø 30mm',    quantidade:320, unidade:'kg', localizacao:'Prateleira A5 - Setor 1', limiteSeguranca:250, reservado:80 },
+  { id:'3', codigo:'INOX-304',   nome:'Aço Inoxidável 304 - Chapa 3mm',     quantidade:180, unidade:'kg', localizacao:'Prateleira B2 - Setor 2', limiteSeguranca:150, reservado:0 },
+  { id:'4', codigo:'ALUM-6061',  nome:'Alumínio 6061 - Barra Ø 20mm',       quantidade:95,  unidade:'kg', localizacao:'Prateleira C1 - Setor 3', limiteSeguranca:100, reservado:45 },
+  { id:'5', codigo:'BRONZE-C630',nome:'Bronze C630 - Tarugo Ø 40mm',        quantidade:420, unidade:'kg', localizacao:'Prateleira C4 - Setor 3', limiteSeguranca:150, reservado:0 },
+  { id:'6', codigo:'ACO-1020-CH',nome:'Aço Carbono 1020 - Chapa 6mm',       quantidade:560, unidade:'kg', localizacao:'Prateleira A1 - Setor 1', limiteSeguranca:300, reservado:200 },
+];
+
+// ── Navegação ──────────────────────────────────────────────────
+function showOnly(id) {
+  ['screen-login','screen-diretor','screen-supervisora','screen-almoxarife']
+    .forEach(s => document.getElementById(s).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function login(role) {
+  currentRole = role;
+  if (role === 'diretor') {
+    showOnly('screen-diretor');
+    renderDiretor();
+  } else if (role === 'supervisora') {
+    showOnly('screen-supervisora');
+    renderKanban();
+  } else {
+    showOnly('screen-almoxarife');
+    renderAlmoxarife();
+  }
+}
+
+function logout() {
+  currentRole = null;
+  showOnly('screen-login');
+}
+
+// ── DIRETOR ────────────────────────────────────────────────────
+function renderDiretor(filter) {
+  // KPI prazos
+  const noPrazo = orders.filter(o => o.status === 'no-prazo').length;
+  const total   = orders.length;
+  const pct     = Math.round((noPrazo / total) * 100);
+  document.getElementById('kpi-prazo-val').textContent = `${noPrazo} / ${total}`;
+  document.getElementById('kpi-prazo-bar').style.width = pct + '%';
+  document.getElementById('kpi-prazo-pct').textContent = pct + '%';
+
+  // KPI críticos
+  const criticos = orders.filter(o => o.status === 'atrasado').length;
+  document.getElementById('kpi-crit-val').textContent = criticos;
+  document.getElementById('kpi-crit-msg').innerHTML = criticos > 0
+    ? `<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:.5rem;padding:.75rem">
+         <p style="color:#f87171;font-size:.85rem;font-weight:600">⚠️ Ação necessária!</p>
+         <p style="color:#f87171;font-size:.75rem;margin-top:.25rem">Pedidos com atraso &gt; 10%</p>
+       </div>`
+    : `<div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:.5rem;padding:.75rem">
+         <p style="color:#4ade80;font-size:.85rem;font-weight:600">✓ Tudo em ordem</p>
+       </div>`;
+
+  // Tabela
+  const term = (filter || '').toLowerCase();
+  const filtered = orders.filter(o =>
+    o.id.toLowerCase().includes(term) ||
+    o.cliente.toLowerCase().includes(term) ||
+    o.peca.toLowerCase().includes(term)
+  );
+  const tbody = document.getElementById('orders-tbody');
+  tbody.innerHTML = filtered.map(o => {
+    const badgeCls = o.status === 'no-prazo' ? 'badge-green' : o.status === 'atencao' ? 'badge-orange' : 'badge-red';
+    const badgeTxt = o.status === 'no-prazo' ? 'No Prazo' : o.status === 'atencao' ? 'Atenção' : 'Atrasado';
+    const barColor = o.progresso >= 80 ? '#22c55e' : o.progresso >= 50 ? '#3b82f6' : '#f97316';
+    const priClass = o.prioridade ? 'on' : 'off';
+    const priTxt   = o.prioridade ? '⚡ PRIORITÁRIO' : '⚡ Priorizar';
+    return `
+      <tr class="${o.prioridade ? 'priority-row' : ''}">
+        <td><code style="font-weight:700;color:#fff">${o.id}</code></td>
+        <td>${o.cliente}</td>
+        <td>${o.peca}</td>
+        <td>${o.quantidade}</td>
+        <td>🕐 ${o.dataEntrega}</td>
+        <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+        <td>
+          <div class="td-progress">
+            <div class="td-progress-track">
+              <div class="td-progress-fill" style="width:${o.progresso}%;background:${barColor}"></div>
+            </div>
+            <span style="font-size:.8rem;min-width:2.5rem;color:#cbd5e1">${o.progresso}%</span>
+          </div>
+        </td>
+        <td>
+          <button class="btn-priority ${priClass}" onclick="togglePriority('${o.id}')">${priTxt}</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function filterOrders(v) { renderDiretor(v); }
+
+function togglePriority(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  o.prioridade = !o.prioridade;
+  if (o.prioridade) alert(`⚡ PRIORIDADE MÁXIMA ativada para ${id}\n\nNotificação enviada para todos os tablets da fábrica!`);
+  renderDiretor();
+}
+
+// ── SUPERVISORA / KANBAN ───────────────────────────────────────
+function renderKanban() {
+  const grid = document.getElementById('kanban-grid');
+  grid.innerHTML = machines.map(m => {
+    const cardCls  = `machine-card status-${m.status}`;
+    const dotCls   = m.status === 'operando' ? 'dot-green' : m.status === 'pausada' ? 'dot-orange' : 'dot-gray';
+    const dotIcon  = m.status === 'operando' ? '▶' : m.status === 'pausada' ? '⏸' : '🕐';
+
+    const osBox = m.osAtual
+      ? `<div class="machine-os-box">
+           <div class="os-row">O.S.: <span class="os-id">${m.osAtual}</span></div>
+           <div class="os-peca">${m.pecaAtual}</div>
+           <div style="margin-top:.75rem">
+             <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-bottom:.4rem">
+               <span>Progresso</span><span style="color:#fff;font-weight:700">${m.progresso}%</span>
+             </div>
+             <div class="progress-bar-track">
+               <div class="progress-bar-fill" style="width:${m.progresso}%;background:#22c55e"></div>
+             </div>
+           </div>
+         </div>`
+      : `<div class="machine-os-box" style="text-align:center;color:#64748b">Máquina Disponível</div>`;
+
+    const disStart   = m.status === 'operando' ? 'disabled' : '';
+    const disPause   = m.status !== 'operando' ? 'disabled' : '';
+    const disFinish  = !m.osAtual ? 'disabled' : '';
+
+    return `
+      <div class="${cardCls}">
+        <div class="machine-card-header">
+          <div>
+            <div class="machine-name">${m.id}</div>
+            <div class="machine-type">${m.nome}</div>
+          </div>
+          <div class="machine-status-dot ${dotCls}">${dotIcon}</div>
+        </div>
+        ${osBox}
+        <div class="btn-grid">
+          <button class="btn-machine green" ${disStart} onclick="machineAction('${m.id}','start')">
+            <span class="icon">▶</span>Iniciar
+          </button>
+          <button class="btn-machine orange" ${disPause} onclick="machineAction('${m.id}','pause')">
+            <span class="icon">⏸</span>Pausar
+          </button>
+          <button class="btn-machine blue" ${disFinish} onclick="machineAction('${m.id}','finish')">
+            <span class="icon">✅</span>Finalizar
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function machineAction(id, action) {
+  pendingMachineId = id;
+  pendingAction    = action;
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').classList.add('hidden');
+  document.getElementById('modal-pin').classList.remove('hidden');
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+function closePinModal() {
+  pendingMachineId = null;
+  pendingAction    = null;
+  document.getElementById('modal-pin').classList.add('hidden');
+}
+
+function submitPin() {
+  const pin = document.getElementById('pin-input').value;
+  if (pin !== '1234') {
+    document.getElementById('pin-error').classList.remove('hidden');
+    document.getElementById('pin-input').value = '';
+    return;
+  }
+  const m = machines.find(x => x.id === pendingMachineId);
+  if (m) {
+    if (pendingAction === 'start') {
+      m.status = 'operando';
+    } else if (pendingAction === 'pause') {
+      m.status = 'pausada';
+    } else if (pendingAction === 'finish') {
+      m.status = 'disponivel';
+      m.osAtual = null;
+      m.pecaAtual = null;
+      m.progresso = 0;
+    }
+  }
+  closePinModal();
+  renderKanban();
+}
+
+// ── MODAL O.S. ─────────────────────────────────────────────────
+function openOSModal()  { document.getElementById('modal-os').classList.remove('hidden'); }
+function closeOSModal() { document.getElementById('modal-os').classList.add('hidden'); }
+function createOS() {
+  alert('✓ O.S. criada com sucesso!\n\nMatéria-prima reservada automaticamente no estoque.');
+  closeOSModal();
+}
+
+// ── ALMOXARIFE ─────────────────────────────────────────────────
+function matStatus(m) {
+  const disp = m.quantidade - m.reservado;
+  const pct  = (disp / m.limiteSeguranca) * 100;
+  if (pct >= 100) return 'green';
+  if (pct >= 50)  return 'yellow';
+  return 'red';
+}
+function matLabel(m) {
+  const s = matStatus(m);
+  return s === 'green' ? 'Normal' : s === 'yellow' ? 'Atenção' : 'Crítico';
+}
+
+function renderAlmoxarife(filter) {
+  const term = (filter || '').toLowerCase();
+  const visible = materials.filter(m =>
+    m.codigo.toLowerCase().includes(term) ||
+    m.nome.toLowerCase().includes(term) ||
+    m.localizacao.toLowerCase().includes(term)
+  );
+
+  // KPIs
+  document.getElementById('alm-total').textContent = materials.length;
+  document.getElementById('alm-atencao').textContent  = materials.filter(m => matStatus(m) === 'yellow').length;
+  document.getElementById('alm-criticos').textContent = materials.filter(m => matStatus(m) === 'red').length;
+
+  const colorMap = { green: '#22c55e', yellow: '#f97316', red: '#ef4444' };
+  const bgMap    = { green: 'rgba(34,197,94,.1)', yellow: 'rgba(249,115,22,.1)', red: 'rgba(239,68,68,.1)' };
+
+  document.getElementById('material-list-body').innerHTML = visible.map(m => {
+    const s    = matStatus(m);
+    const lbl  = matLabel(m);
+    const disp = m.quantidade - m.reservado;
+    const pct  = Math.round((disp / m.limiteSeguranca) * 100);
+    const col  = colorMap[s];
+    const bg   = bgMap[s];
+    const badgeCls = s === 'green' ? 'badge-green' : s === 'yellow' ? 'badge-orange' : 'badge-red';
+
+    return `
+      <div class="material-item">
+        <div class="mat-icon-wrap">
+          <div class="mat-icon-circle" style="background:${bg}">
+            <span style="font-size:1.4rem">📦</span>
+          </div>
+        </div>
+        <div class="mat-body">
+          <div class="mat-top">
+            <div>
+              <div style="display:flex;align-items:center;gap:.75rem">
+                <span class="mat-code">${m.codigo}</span>
+                <span class="badge ${badgeCls}">${lbl}</span>
+              </div>
+              <div class="mat-nome">${m.nome}</div>
+            </div>
+          </div>
+          <div class="mat-loc">📍 ${m.localizacao}</div>
+          <div class="mat-qtd-grid">
+            <div class="mat-qtd-box box-default">
+              <div class="mat-qtd-label" style="color:#94a3b8">Quantidade Total</div>
+              <div class="mat-qtd-value">${m.quantidade} ${m.unidade}</div>
+            </div>
+            <div class="mat-qtd-box box-orange">
+              <div class="mat-qtd-label" style="color:#fb923c">Reservado</div>
+              <div class="mat-qtd-value" style="color:#fb923c">${m.reservado} ${m.unidade}</div>
+            </div>
+            <div class="mat-qtd-box" style="background:${bg}">
+              <div class="mat-qtd-label" style="color:${col}">Disponível</div>
+              <div class="mat-qtd-value" style="color:${col}">${disp} ${m.unidade}</div>
+            </div>
+            <div class="mat-qtd-box" style="background:rgba(59,130,246,.1)">
+              <div class="mat-qtd-label" style="color:#60a5fa">Limite de Segurança</div>
+              <div class="mat-qtd-value" style="color:#60a5fa">${m.limiteSeguranca} ${m.unidade}</div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-bottom:.4rem">
+              <span>Status do Estoque</span><span style="color:#cbd5e1">${pct}% do limite</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" style="width:${Math.min(pct,100)}%;background:${col}"></div>
+            </div>
+          </div>
+          ${m.reservado > 0 ? `<div class="mat-reserva-alert">
+            <strong>⚡ Reserva Automática:</strong> ${m.reservado} ${m.unidade} reservados para O.S. em andamento
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterMaterials(v) { renderAlmoxarife(v); }
+
+// ── Fechar modais clicando fora ────────────────────────────────
+document.getElementById('modal-pin').addEventListener('click', function(e) {
+  if (e.target === this) closePinModal();
+});
+document.getElementById('modal-os').addEventListener('click', function(e) {
+  if (e.target === this) closeOSModal();
+});
+
+// ── Enter no PIN ───────────────────────────────────────────────
+document.getElementById('pin-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') submitPin();
+});
+</script>
+</body>
+</html>
