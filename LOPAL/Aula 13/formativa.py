@@ -2,6 +2,12 @@
 # Crie uma aplicação que pergunte o nome e o ano de nascimento do usuário
 # Calcule a idade
 
+
+
+
+import tkinter as tk
+from tkinter import messagebox, ttk
+
 def cadastro_usuario():
     nome_usuario = ent_nome_usuario.get()
     idade_usuario = ent_idade_usuario.get()
@@ -9,16 +15,10 @@ def cadastro_usuario():
     if nome_usuario and idade_usuario == "":
         messagebox.showwarning("Verificar Dados", "Verificar os campos")
     else:
-        idade_usuario = idade_usuario - 2026
-        messagebox.showinfo(f"Bem-Vindo {nome_usuario}, você tem {idade_usuario} anos!")
+        calculo_idade = 2026 - int(idade_usuario)
+        messagebox.showinfo("Cadastro Realizado!", f"Bem-Vindo {nome_usuario}, você tem {calculo_idade} anos!")
 
         
-
-
-
-import tkinter as tk
-from tkinter import messagebox, ttk
-
 janela = tk.Tk()
 janela.title("Tela Cadastral")
 janela.geometry("500x500")
@@ -36,10 +36,10 @@ lbl_idade_usuario.grid(row=2, column = 0, pady= 10, padx= 20)
 ent_nome_usuario = tk.Entry(janela, font=("Arial", 12), fg = "black")
 ent_nome_usuario.grid(row=1, column= 1, padx =20, pady= 10)
 
-ent_idade_usuario = tk.Entry(janela, font=("Arial", 12), fg= "white")
+ent_idade_usuario = tk.Entry(janela, font=("Arial", 12), fg= "black")
 ent_idade_usuario.grid(row= 2, column = 1, pady = 10, padx =20)
 
-btn_enviar_dados = tk.Button(janela, text= "Calcular Idade", font=("Arial", 12), fg = "white", bg= "gray")
+btn_enviar_dados = tk.Button(janela, text= "Calcular Idade", font=("Arial", 12), fg = "white", bg= "gray", command=cadastro_usuario)
 btn_enviar_dados.grid(row=3, column=0, pady=10, padx=10)
 
 btn_fechar_aplicacao = tk.Button(janela, text="Fechar Aplicação", font=("Arial", 12), width=20 , fg= "white", bg = "gray", command=janela.destroy) 
